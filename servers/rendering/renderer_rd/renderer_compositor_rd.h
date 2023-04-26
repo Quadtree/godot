@@ -82,7 +82,12 @@ protected:
 		float upscale;
 		float aspect_ratio;
 		uint32_t layer;
-		uint32_t pad1;
+
+		float hdr_white_point;
+		uint32_t hdr_enabled;
+		uint32_t hdr_debug_visualization;
+
+		uint32_t pad[2];
 	};
 
 	struct Blit {

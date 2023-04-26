@@ -83,6 +83,12 @@ private:
 		float pixel_size[2]; //  8 - 104
 		uint32_t use_fxaa; //  4 - 108
 		uint32_t use_debanding; //  4 - 112
+
+		float hdr_white_point;
+		uint32_t hdr_enabled;
+
+		float hdr_peak_luminance_nits;
+		float hdr_tone_mapper_exposure_modifier;
 	};
 
 	/* tonemap actually writes to a framebuffer, which is

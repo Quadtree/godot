@@ -81,6 +81,12 @@ layout(push_constant, std430) uniform Params {
 	vec2 pixel_size;
 	bool use_fxaa;
 	bool use_debanding;
+
+	float hdr_white_point;
+	uint hdr_enabled;
+
+	float hdr_peak_luminance_nits;
+	float hdr_tone_mapper_exposure_modifier;
 }
 params;
 
@@ -246,7 +252,9 @@ vec3 tonemap_reinhard(vec3 color, float white) {
 
 vec3 linear_to_srgb(vec3 color) {
 	//if going to srgb, clamp from 0 to 1.
-	color = clamp(color, vec3(0.0), vec3(1.0));
+	if (params.hdr_enabled == 0) {
+		color = clamp(color, vec3(0.0), vec3(1.0));
+	}
 	const vec3 a = vec3(0.055f);
 	return mix((vec3(1.0f) + a) * pow(color.rgb, vec3(1.0f / 2.4f)) - a, 12.92f * color.rgb, lessThan(color.rgb, vec3(0.0031308f)));
 }
@@ -438,6 +446,10 @@ void main() {
 
 	float exposure = params.exposure;
 
+	if (params.hdr_enabled == 1) {
+		exposure *= params.hdr_tone_mapper_exposure_modifier * params.hdr_white_point / params.hdr_peak_luminance_nits;
+	}
+
 #ifndef SUBPASS
 	if (params.use_auto_exposure) {
 		exposure *= 1.0 / (texelFetch(source_auto_exposure, ivec2(0, 0), 0).r * params.luminance_multiplier / params.auto_exposure_scale);
@@ -462,9 +474,16 @@ void main() {
 	}
 #endif
 
-	color.rgb = apply_tonemapping(color.rgb, params.white);
+	float white = params.white;
 
-	color.rgb = linear_to_srgb(color.rgb); // regular linear -> SRGB conversion
+	if (params.hdr_enabled == 1) {
+		white *= params.hdr_white_point / params.hdr_peak_luminance_nits;
+	}
+
+	if (params.hdr_enabled == 0) {
+		color.rgb = apply_tonemapping(color.rgb, white);
+		color.rgb = linear_to_srgb(color.rgb); // regular linear -> SRGB conversion
+	}
 
 #ifndef SUBPASS
 	// Glow
@@ -474,13 +493,20 @@ void main() {
 			glow = mix(glow, texture(glow_map, uv_interp).rgb * glow, params.glow_map_strength);
 		}
 
-		// high dynamic range -> SRGB
-		glow = apply_tonemapping(glow, params.white);
-		glow = linear_to_srgb(glow);
+		if (params.hdr_enabled == 0) {
+			// high dynamic range -> SRGB
+			glow = apply_tonemapping(glow, params.white);
+			glow = linear_to_srgb(glow);
+		}
 
 		color.rgb = apply_glow(color.rgb, glow);
 	}
 #endif
+
+	if (params.hdr_enabled == 1) {
+		color.rgb = apply_tonemapping(color.rgb, white);
+		color.rgb = linear_to_srgb(color.rgb); // regular linear -> SRGB conversion
+	}
 
 	// Additional effects
 

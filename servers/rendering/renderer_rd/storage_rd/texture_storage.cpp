@@ -32,6 +32,7 @@
 
 #include "../effects/copy_effects.h"
 #include "../framebuffer_cache_rd.h"
+#include "core/config/project_settings.h"
 #include "material_storage.h"
 #include "servers/rendering/renderer_rd/renderer_scene_render_rd.h"
 
@@ -2568,8 +2569,13 @@ void TextureStorage::_update_render_target(RenderTarget *rt) {
 		return;
 	}
 	//until we implement support for HDR monitors (and render target is attached to screen), this is enough.
-	rt->color_format = RD::DATA_FORMAT_R8G8B8A8_UNORM;
-	rt->color_format_srgb = RD::DATA_FORMAT_R8G8B8A8_SRGB;
+	if (GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool()) {
+		rt->color_format = RD::DATA_FORMAT_R16G16B16A16_SFLOAT;
+		rt->color_format_srgb = RD::DATA_FORMAT_R16G16B16A16_SFLOAT;
+	} else {
+		rt->color_format = RD::DATA_FORMAT_R8G8B8A8_UNORM;
+		rt->color_format_srgb = RD::DATA_FORMAT_R8G8B8A8_SRGB;
+	}
 	rt->image_format = rt->is_transparent ? Image::FORMAT_RGBA8 : Image::FORMAT_RGB8;
 
 	RD::TextureFormat rd_color_attachment_format;

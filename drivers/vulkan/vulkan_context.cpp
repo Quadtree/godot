@@ -1565,41 +1565,59 @@ Error VulkanContext::_initialize_queues(VkSurfaceKHR p_surface) {
 		free(surfFormats);
 		ERR_FAIL_V(ERR_CANT_CREATE);
 	}
-	// If the format list includes just one entry of VK_FORMAT_UNDEFINED,
-	// the surface has no preferred format.  Otherwise, at least one
-	// supported format will be returned.
-	if (formatCount == 1 && surfFormats[0].format == VK_FORMAT_UNDEFINED) {
-		format = VK_FORMAT_B8G8R8A8_UNORM;
-		color_space = surfFormats[0].colorSpace;
-	} else {
-		// These should be ordered with the ones we want to use on top and fallback modes further down
-		// we want a 32bit RGBA unsigned normalized buffer or similar.
-		const VkFormat allowed_formats[] = {
-			VK_FORMAT_B8G8R8A8_UNORM,
-			VK_FORMAT_R8G8B8A8_UNORM
-		};
-		uint32_t allowed_formats_count = sizeof(allowed_formats) / sizeof(VkFormat);
 
-		if (formatCount < 1) {
-			free(surfFormats);
-			ERR_FAIL_V_MSG(ERR_CANT_CREATE, "formatCount less than 1");
-		}
+	bool only_allow_hdr_formats = GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool();
 
-		// Find the first format that we support.
-		format = VK_FORMAT_UNDEFINED;
-		for (uint32_t af = 0; af < allowed_formats_count && format == VK_FORMAT_UNDEFINED; af++) {
-			for (uint32_t sf = 0; sf < formatCount && format == VK_FORMAT_UNDEFINED; sf++) {
-				if (surfFormats[sf].format == allowed_formats[af]) {
-					format = surfFormats[sf].format;
-					color_space = surfFormats[sf].colorSpace;
+	for (int attempt = 0; attempt < 2; ++attempt) {
+		// If the format list includes just one entry of VK_FORMAT_UNDEFINED,
+		// the surface has no preferred format.  Otherwise, at least one
+		// supported format will be returned.
+		if (formatCount == 1 && surfFormats[0].format == VK_FORMAT_UNDEFINED) {
+			format = VK_FORMAT_B8G8R8A8_UNORM;
+			color_space = surfFormats[0].colorSpace;
+		} else {
+			// These should be ordered with the ones we want to use on top and fallback modes further down
+			// we want a 32bit RGBA unsigned normalized buffer or similar.
+			VkFormat allowed_formats[] = {
+				VK_FORMAT_B8G8R8A8_UNORM,
+				VK_FORMAT_R8G8B8A8_UNORM
+			};
+
+			uint32_t allowed_formats_count = sizeof(allowed_formats) / sizeof(VkFormat);
+
+			if (only_allow_hdr_formats) {
+				allowed_formats[0] = VK_FORMAT_A2B10G10R10_UNORM_PACK32;
+				allowed_formats_count = 1;
+			}
+
+			if (formatCount < 1) {
+				free(surfFormats);
+				ERR_FAIL_V_MSG(ERR_CANT_CREATE, "formatCount less than 1");
+			}
+
+			// Find the first format that we support.
+			format = VK_FORMAT_UNDEFINED;
+			for (uint32_t af = 0; af < allowed_formats_count && format == VK_FORMAT_UNDEFINED; af++) {
+				for (uint32_t sf = 0; sf < formatCount && format == VK_FORMAT_UNDEFINED; sf++) {
+					if (surfFormats[sf].format == allowed_formats[af] && (!only_allow_hdr_formats || surfFormats[sf].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT)) {
+						format = surfFormats[sf].format;
+						color_space = surfFormats[sf].colorSpace;
+					}
 				}
 			}
 		}
 
-		if (format == VK_FORMAT_UNDEFINED) {
-			free(surfFormats);
-			ERR_FAIL_V_MSG(ERR_CANT_CREATE, "No usable surface format found.");
+		if (format != VK_FORMAT_UNDEFINED) {
+			break;
+		} else {
+			print_error("Warning: We were not able to find a valid HDR format, so we are falling back on SDR mode, but since we will still be using ST2084 EOTF visuals will look distorted.");
+			only_allow_hdr_formats = false;
 		}
+	}
+
+	if (format == VK_FORMAT_UNDEFINED) {
+		free(surfFormats);
+		ERR_FAIL_V_MSG(ERR_CANT_CREATE, "No usable surface format found.");
 	}
 
 	free(surfFormats);
