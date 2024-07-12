@@ -76,7 +76,6 @@ protected:
 
 		float rotation_sin;
 		float rotation_cos;
-		float pad[2];
 
 		float eye_center[2];
 		float k1;
@@ -85,7 +84,10 @@ protected:
 		float upscale;
 		float aspect_ratio;
 		uint32_t layer;
-		uint32_t convert_to_srgb;
+		uint32_t source_is_srgb;
+
+		uint32_t target_color_space;
+		float reference_display_luminance;
 	};
 
 	struct Blit {
@@ -105,6 +107,9 @@ protected:
 
 	static uint64_t frame;
 	static RendererCompositorRD *singleton;
+
+	RenderingDevice::FramebufferFormatID prev_main_window_format;
+	void _ensure_blit_pipelines();
 
 public:
 	RendererUtilities *get_utilities() { return utilities; }

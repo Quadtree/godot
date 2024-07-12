@@ -10,7 +10,6 @@ layout(push_constant, std140) uniform Pos {
 
 	float rotation_sin;
 	float rotation_cos;
-	vec2 pad;
 
 	vec2 eye_center;
 	float k1;
@@ -19,7 +18,10 @@ layout(push_constant, std140) uniform Pos {
 	float upscale;
 	float aspect_ratio;
 	uint layer;
-	bool convert_to_srgb;
+	bool source_is_srgb;
+
+	uint target_color_space;
+	float reference_display_luminance;
 }
 data;
 
@@ -50,7 +52,6 @@ layout(push_constant, std140) uniform Pos {
 
 	float rotation_sin;
 	float rotation_cos;
-	vec2 pad;
 
 	vec2 eye_center;
 	float k1;
@@ -59,7 +60,10 @@ layout(push_constant, std140) uniform Pos {
 	float upscale;
 	float aspect_ratio;
 	uint layer;
-	bool convert_to_srgb;
+	bool source_is_srgb;
+
+	uint target_color_space;
+	float reference_display_luminance;
 }
 data;
 
@@ -73,12 +77,7 @@ layout(binding = 0) uniform sampler2DArray src_rt;
 layout(binding = 0) uniform sampler2D src_rt;
 #endif
 
-vec3 linear_to_srgb(vec3 color) {
-	// If going to srgb, clamp from 0 to 1.
-	color = clamp(color, vec3(0.0), vec3(1.0));
-	const vec3 a = vec3(0.055f);
-	return mix((vec3(1.0f) + a) * pow(color.rgb, vec3(1.0f / 2.4f)) - a, 12.92f * color.rgb, lessThan(color.rgb, vec3(0.0031308f)));
-}
+#include "color_space_inc.glsl"
 
 void main() {
 #ifdef APPLY_LENS_DISTORTION
@@ -116,7 +115,14 @@ void main() {
 	color = texture(src_rt, uv);
 #endif
 
-	if (data.convert_to_srgb) {
-		color.rgb = linear_to_srgb(color.rgb); // Regular linear -> SRGB conversion.
+	if (data.target_color_space == COLOR_SPACE_SRGB_NONLINEAR && data.source_is_srgb == false) {
+		color.rgb = linear_to_srgb(color.rgb); // linear -> sRGB conversion.
+	} else if (data.target_color_space == COLOR_SPACE_HDR10_ST2084) {
+		if (data.source_is_srgb == true) {
+			// HACK: Converting back to linear since I'm not sure who else converts to sRGB.
+			color.rgb = srgb_to_linear(color.rgb); // sRGB -> linear conversion.
+		}
+
+		color.rgb = linear_to_st2084(color.rgb, data.reference_display_luminance); // linear -> ST2084 conversion.
 	}
 }
