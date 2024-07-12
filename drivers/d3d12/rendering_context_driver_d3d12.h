@@ -109,6 +109,10 @@ public:
 	virtual void surface_set_size(SurfaceID p_surface, uint32_t p_width, uint32_t p_height) override;
 	virtual void surface_set_vsync_mode(SurfaceID p_surface, DisplayServer::VSyncMode p_vsync_mode) override;
 	virtual DisplayServer::VSyncMode surface_get_vsync_mode(SurfaceID p_surface) const override;
+	virtual void surface_set_hdr_output_enabled(SurfaceID p_surface, bool p_enabled) override;
+	virtual bool surface_get_hdr_output_enabled(SurfaceID p_surface) const override;
+	virtual void surface_set_hdr_output_reference_luminance(SurfaceID p_surface, float p_reference_luminance) override;
+	virtual float surface_get_hdr_output_reference_luminance(SurfaceID p_surface) const override;
 	virtual uint32_t surface_get_width(SurfaceID p_surface) const override;
 	virtual uint32_t surface_get_height(SurfaceID p_surface) const override;
 	virtual void surface_set_needs_resize(SurfaceID p_surface, bool p_needs_resize) override;
@@ -127,6 +131,8 @@ public:
 		uint32_t width = 0;
 		uint32_t height = 0;
 		DisplayServer::VSyncMode vsync_mode = DisplayServer::VSYNC_ENABLED;
+		bool hdr_output = false;
+		float hdr_reference_luminance = 0.0f;
 		bool needs_resize = false;
 		ComPtr<IDCompositionDevice> composition_device;
 		ComPtr<IDCompositionTarget> composition_target;
