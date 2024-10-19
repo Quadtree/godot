@@ -1681,63 +1681,66 @@ void EditorNode::_save_scene_with_preview(String p_file, int p_idx) {
 		// Current view?
 
 		Ref<Image> img;
-		// If neither 3D or 2D nodes are present, make a 1x1 black texture.
-		// We cannot fallback on the 2D editor, because it may not have been used yet,
-		// which would result in an invalid texture.
-		if (c3d == 0 && c2d == 0) {
-			img.instantiate();
-			img->initialize_data(1, 1, false, Image::FORMAT_RGB8);
-		} else if (c3d < c2d) {
-			Ref<ViewportTexture> viewport_texture = scene_root->get_texture();
-			if (viewport_texture->get_width() > 0 && viewport_texture->get_height() > 0) {
-				img = viewport_texture->get_image();
-			}
-		} else {
-			// The 3D editor may be disabled as a feature, but scenes can still be opened.
-			// This check prevents the preview from regenerating in case those scenes are then saved.
-			// The preview will be generated if no feature profile is set (as the 3D editor is enabled by default).
-			Ref<EditorFeatureProfile> profile = feature_profile_manager->get_current_profile();
-			if (!profile.is_valid() || !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_3D)) {
-				img = Node3DEditor::get_singleton()->get_editor_viewport(0)->get_viewport_node()->get_texture()->get_image();
-			}
-		}
 
-		if (img.is_valid() && img->get_width() > 0 && img->get_height() > 0) {
-			img = img->duplicate();
+		if (!GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool()) {
+			// If neither 3D or 2D nodes are present, make a 1x1 black texture.
+			// We cannot fallback on the 2D editor, because it may not have been used yet,
+			// which would result in an invalid texture.
+			if (c3d == 0 && c2d == 0) {
+				img.instantiate();
+				img->initialize_data(1, 1, false, Image::FORMAT_RGB8);
+			} else if (c3d < c2d) {
+				Ref<ViewportTexture> viewport_texture = scene_root->get_texture();
+				if (viewport_texture->get_width() > 0 && viewport_texture->get_height() > 0) {
+					img = viewport_texture->get_image();
+				}
+			} else {
+				// The 3D editor may be disabled as a feature, but scenes can still be opened.
+				// This check prevents the preview from regenerating in case those scenes are then saved.
+				// The preview will be generated if no feature profile is set (as the 3D editor is enabled by default).
+				Ref<EditorFeatureProfile> profile = feature_profile_manager->get_current_profile();
+				if (!profile.is_valid() || !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_3D)) {
+					img = Node3DEditor::get_singleton()->get_editor_viewport(0)->get_viewport_node()->get_texture()->get_image();
+				}
+			}
+
+			if (img.is_valid() && img->get_width() > 0 && img->get_height() > 0) {
+				img = img->duplicate();
 
 			save_scene_progress->step(TTR("Creating Thumbnail"), 3);
 
-			int preview_size = EDITOR_GET("filesystem/file_dialog/thumbnail_size");
-			preview_size *= EDSCALE;
+				int preview_size = EDITOR_GET("filesystem/file_dialog/thumbnail_size");
+				preview_size *= EDSCALE;
 
-			// Consider a square region.
-			int vp_size = MIN(img->get_width(), img->get_height());
-			int x = (img->get_width() - vp_size) / 2;
-			int y = (img->get_height() - vp_size) / 2;
+				// Consider a square region.
+				int vp_size = MIN(img->get_width(), img->get_height());
+				int x = (img->get_width() - vp_size) / 2;
+				int y = (img->get_height() - vp_size) / 2;
 
-			if (vp_size < preview_size) {
-				// Just square it.
-				img->crop_from_point(x, y, vp_size, vp_size);
-			} else {
-				int ratio = vp_size / preview_size;
-				int size = preview_size * MAX(1, ratio / 2);
+				if (vp_size < preview_size) {
+					// Just square it.
+					img->crop_from_point(x, y, vp_size, vp_size);
+				} else {
+					int ratio = vp_size / preview_size;
+					int size = preview_size * MAX(1, ratio / 2);
 
-				x = (img->get_width() - size) / 2;
-				y = (img->get_height() - size) / 2;
+					x = (img->get_width() - size) / 2;
+					y = (img->get_height() - size) / 2;
 
-				img->crop_from_point(x, y, size, size);
-				img->resize(preview_size, preview_size, Image::INTERPOLATE_LANCZOS);
+					img->crop_from_point(x, y, size, size);
+					img->resize(preview_size, preview_size, Image::INTERPOLATE_LANCZOS);
+				}
+				img->convert(Image::FORMAT_RGB8);
+
+				// Save thumbnail directly, as thumbnailer may not update due to actual scene not changing md5.
+				String temp_path = EditorPaths::get_singleton()->get_cache_dir();
+				String cache_base = ProjectSettings::get_singleton()->globalize_path(p_file).md5_text();
+				cache_base = temp_path.path_join("resthumb-" + cache_base);
+
+				// Does not have it, try to load a cached thumbnail.
+				post_process_preview(img);
+				img->save_png(cache_base + ".png");
 			}
-			img->convert(Image::FORMAT_RGB8);
-
-			// Save thumbnail directly, as thumbnailer may not update due to actual scene not changing md5.
-			String temp_path = EditorPaths::get_singleton()->get_cache_dir();
-			String cache_base = ProjectSettings::get_singleton()->globalize_path(p_file).md5_text();
-			cache_base = temp_path.path_join("resthumb-" + cache_base);
-
-			// Does not have it, try to load a cached thumbnail.
-			post_process_preview(img);
-			img->save_png(cache_base + ".png");
 		}
 	}
 

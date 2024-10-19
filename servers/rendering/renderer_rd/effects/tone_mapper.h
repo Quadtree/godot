@@ -88,6 +88,12 @@ private:
 		float white; //  4 - 88
 		float auto_exposure_scale; //  4 - 92
 		float luminance_multiplier; //  4 - 96
+
+		float hdr_white_point;
+		uint32_t hdr_enabled;
+
+		float hdr_peak_luminance_nits;
+		float hdr_tone_mapper_exposure_modifier;
 	};
 
 	/* tonemap actually writes to a framebuffer, which is

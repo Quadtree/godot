@@ -1879,6 +1879,12 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		display_driver = NULL_DISPLAY_DRIVER;
 	}
 
+	GLOBAL_DEF_RST_BASIC("rendering/hdr_output/hdr_output_enabled", false);
+	GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "rendering/hdr_output/hdr_white_point", PROPERTY_HINT_RANGE, "10,1000,10"), 150);
+	GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "rendering/hdr_output/hdr_peak_luminance_nits", PROPERTY_HINT_RANGE, "10,4000,10"), 1000);
+	GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "rendering/hdr_output/tone_mapper_exposure_modifier", PROPERTY_HINT_RANGE, "0.0,1.5,0.01"), 1.0f);
+	GLOBAL_DEF_BASIC("rendering/hdr_output/debug_visualization", false);
+
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/debugger/max_chars_per_second", PROPERTY_HINT_RANGE, "0, 4096, 1, or_greater"), 32768);
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/debugger/max_queued_messages", PROPERTY_HINT_RANGE, "0, 8192, 1, or_greater"), 2048);
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/debugger/max_errors_per_second", PROPERTY_HINT_RANGE, "0, 200, 1, or_greater"), 400);

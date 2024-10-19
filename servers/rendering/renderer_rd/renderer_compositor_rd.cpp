@@ -82,6 +82,9 @@ void RendererCompositorRD::blit_render_targets_to_screen(DisplayServer::WindowID
 		blit.push_constant.upscale = p_render_targets[i].lens_distortion.upscale;
 		blit.push_constant.aspect_ratio = p_render_targets[i].lens_distortion.aspect_ratio;
 		blit.push_constant.convert_to_srgb = texture_storage->render_target_is_using_hdr(p_render_targets[i].render_target);
+		blit.push_constant.hdr_enabled = GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool();
+		blit.push_constant.hdr_white_point = GLOBAL_GET("rendering/hdr_output/hdr_white_point").operator float();
+		blit.push_constant.hdr_debug_visualization = GLOBAL_GET("rendering/hdr_output/debug_visualization").operator bool();
 
 		RD::get_singleton()->draw_list_set_push_constant(draw_list, &blit.push_constant, sizeof(BlitPushConstant));
 		RD::get_singleton()->draw_list_draw(draw_list, true);
@@ -244,6 +247,9 @@ void RendererCompositorRD::set_boot_image(const Ref<Image> &p_image, const Color
 	blit.push_constant.upscale = 1.0;
 	blit.push_constant.aspect_ratio = 1.0;
 	blit.push_constant.convert_to_srgb = false;
+	blit.push_constant.hdr_enabled = GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool();
+	blit.push_constant.hdr_white_point = GLOBAL_GET("rendering/hdr_output/hdr_white_point").operator float();
+	blit.push_constant.hdr_debug_visualization = GLOBAL_GET("rendering/hdr_output/debug_visualization").operator bool();
 
 	RD::get_singleton()->draw_list_set_push_constant(draw_list, &blit.push_constant, sizeof(BlitPushConstant));
 	RD::get_singleton()->draw_list_draw(draw_list, true);

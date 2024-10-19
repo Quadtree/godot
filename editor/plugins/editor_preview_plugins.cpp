@@ -340,7 +340,7 @@ Ref<Texture2D> EditorMaterialPreviewPlugin::generate(const Ref<Resource> &p_from
 	Ref<Material> material = p_from;
 	ERR_FAIL_COND_V(material.is_null(), Ref<Texture2D>());
 
-	if (material->get_shader_mode() == Shader::MODE_SPATIAL) {
+	if (material->get_shader_mode() == Shader::MODE_SPATIAL && !GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool()) {
 		RS::get_singleton()->mesh_surface_set_material(sphere, 0, material->get_rid());
 
 		draw_requester.request_and_wait(viewport);
@@ -739,6 +739,10 @@ bool EditorMeshPreviewPlugin::handles(const String &p_type) const {
 }
 
 Ref<Texture2D> EditorMeshPreviewPlugin::generate(const Ref<Resource> &p_from, const Size2 &p_size, Dictionary &p_metadata) const {
+	// currently, this does not work with HDR
+	if (GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool())
+		return Ref<Texture2D>();
+
 	Ref<Mesh> mesh = p_from;
 	ERR_FAIL_COND_V(mesh.is_null(), Ref<Texture2D>());
 
@@ -848,6 +852,10 @@ bool EditorFontPreviewPlugin::handles(const String &p_type) const {
 }
 
 Ref<Texture2D> EditorFontPreviewPlugin::generate_from_path(const String &p_path, const Size2 &p_size, Dictionary &p_metadata) const {
+	// previews currently don't work with HDR
+	if (GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool())
+		return Ref<Texture2D>();
+
 	Ref<Font> sampled_font = ResourceLoader::load(p_path);
 	ERR_FAIL_COND_V(sampled_font.is_null(), Ref<Texture2D>());
 

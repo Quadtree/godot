@@ -2711,22 +2711,48 @@ RenderingDeviceDriver::SwapChainID RenderingDeviceDriverVulkan::swap_chain_creat
 
 	VkFormat format = VK_FORMAT_UNDEFINED;
 	VkColorSpaceKHR color_space = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-	if (format_count == 1 && formats[0].format == VK_FORMAT_UNDEFINED) {
-		// If the format list includes just one entry of VK_FORMAT_UNDEFINED, the surface has no preferred format.
-		format = VK_FORMAT_B8G8R8A8_UNORM;
-		color_space = formats[0].colorSpace;
-	} else if (format_count > 0) {
-		// Use one of the supported formats, prefer B8G8R8A8_UNORM.
-		const VkFormat preferred_format = VK_FORMAT_B8G8R8A8_UNORM;
-		const VkFormat second_format = VK_FORMAT_R8G8B8A8_UNORM;
-		for (uint32_t i = 0; i < format_count; i++) {
-			if (formats[i].format == preferred_format || formats[i].format == second_format) {
-				format = formats[i].format;
-				if (formats[i].format == preferred_format) {
-					// This is the preferred format, stop searching.
-					break;
+
+	bool only_allow_hdr_formats = GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool();
+
+	for (int attempt = 0; attempt < 2; ++attempt) {
+		if (format_count == 1 && formats[0].format == VK_FORMAT_UNDEFINED) {
+			// If the format list includes just one entry of VK_FORMAT_UNDEFINED, the surface has no preferred format.
+			if (only_allow_hdr_formats) {
+				print_error("Warning: This surface has no preferred format");
+
+				format = VK_FORMAT_R16G16B16A16_SFLOAT;
+				color_space = VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT;
+			} else {
+				format = VK_FORMAT_B8G8R8A8_UNORM;
+				color_space = formats[0].colorSpace;
+			}
+		} else if (format_count > 0) {
+			// Use one of the supported formats, prefer B8G8R8A8_UNORM.
+			VkFormat preferred_format = VK_FORMAT_B8G8R8A8_UNORM;
+			VkFormat second_format = VK_FORMAT_R8G8B8A8_UNORM;
+
+			if (only_allow_hdr_formats) {
+				preferred_format = VK_FORMAT_R16G16B16A16_SFLOAT;
+				second_format = VK_FORMAT_R16G16B16A16_SFLOAT;
+			}
+
+			for (uint32_t i = 0; i < format_count; i++) {
+				if ((formats[i].format == preferred_format || formats[i].format == second_format) && (!only_allow_hdr_formats || formats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)) {
+					format = formats[i].format;
+					color_space = formats[i].colorSpace;
+					if (formats[i].format == preferred_format) {
+						// This is the preferred format, stop searching.
+						break;
+					}
 				}
 			}
+		}
+
+		if (format != VK_FORMAT_UNDEFINED) {
+			break;
+		} else {
+			print_error("Warning: We were not able to find a valid HDR format, so we are falling back on SDR mode, but since we will still be using ST2084 EOTF visuals will look distorted.");
+			only_allow_hdr_formats = false;
 		}
 	}
 
@@ -3043,6 +3069,8 @@ RDD::DataFormat RenderingDeviceDriverVulkan::swap_chain_get_format(SwapChainID p
 			return DATA_FORMAT_B8G8R8A8_UNORM;
 		case VK_FORMAT_R8G8B8A8_UNORM:
 			return DATA_FORMAT_R8G8B8A8_UNORM;
+		case VK_FORMAT_R16G16B16A16_SFLOAT:
+			return DATA_FORMAT_R16G16B16A16_SFLOAT;
 		default:
 			DEV_ASSERT(false && "Unknown swap chain format.");
 			return DATA_FORMAT_MAX;
