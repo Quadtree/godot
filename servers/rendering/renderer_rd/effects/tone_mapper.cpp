@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "tone_mapper.h"
+#include "core/config/project_settings.h"
 #include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
 #include "servers/rendering/renderer_rd/storage_rd/material_storage.h"
 #include "servers/rendering/renderer_rd/uniform_set_cache_rd.h"
@@ -88,6 +89,16 @@ void ToneMapper::tonemapper(RID p_source_color, RID p_dst_framebuffer, const Ton
 	ERR_FAIL_NULL(material_storage);
 
 	memset(&tonemap.push_constant, 0, sizeof(TonemapPushConstant));
+
+	tonemap.push_constant.hdr_enabled = GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool();
+	tonemap.push_constant.hdr_white_point = GLOBAL_GET("rendering/hdr_output/hdr_white_point").operator float();
+	tonemap.push_constant.hdr_peak_luminance_nits = GLOBAL_GET("rendering/hdr_output/hdr_peak_luminance_nits").operator float();
+	tonemap.push_constant.hdr_tone_mapper_exposure_modifier = GLOBAL_GET("rendering/hdr_output/tone_mapper_exposure_modifier").operator float();
+
+	tonemap.push_constant.hdr_enabled = GLOBAL_GET("rendering/hdr_output/hdr_output_enabled").operator bool();
+	tonemap.push_constant.hdr_white_point = GLOBAL_GET("rendering/hdr_output/hdr_white_point").operator float();
+	tonemap.push_constant.hdr_peak_luminance_nits = GLOBAL_GET("rendering/hdr_output/hdr_peak_luminance_nits").operator float();
+	tonemap.push_constant.hdr_tone_mapper_exposure_modifier = GLOBAL_GET("rendering/hdr_output/tone_mapper_exposure_modifier").operator float();
 
 	tonemap.push_constant.flags |= p_settings.use_bcs ? TONEMAP_FLAG_USE_BCS : 0;
 	tonemap.push_constant.bcs[0] = p_settings.brightness;
