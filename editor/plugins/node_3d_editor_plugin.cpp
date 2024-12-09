@@ -2829,7 +2829,7 @@ void Node3DEditorViewport::_project_settings_changed() {
 	const bool transparent_background = GLOBAL_GET("rendering/viewport/transparent_background");
 	viewport->set_transparent_background(transparent_background);
 
-	const bool use_hdr_2d = GLOBAL_GET("rendering/viewport/hdr_2d");
+	const bool use_hdr_2d = GLOBAL_GET("rendering/viewport/hdr_2d") || GLOBAL_GET("display/window/hdr/enabled");
 	viewport->set_use_hdr_2d(use_hdr_2d);
 
 	const bool use_debanding = GLOBAL_GET("rendering/anti_aliasing/quality/use_debanding");
