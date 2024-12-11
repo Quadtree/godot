@@ -28,6 +28,9 @@ vec3 linear_to_st2084(vec3 color, float reference_luminance) {
 	float adjustment = reference_luminance * 0.0001f;
 	color = color * adjustment;
 
+	// Some tonemappers output negative values, and the ST2084 function doesn't handle them properly, so we clip them here
+	color = max(color, vec3(0.0, 0.0, 0.0));
+
 	// TODO: Scale to avoid clipping via max and min luminance?
 
 	// Apply ST2084 curve
