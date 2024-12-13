@@ -788,6 +788,15 @@ float DisplayServer::window_get_hdr_output_reference_luminance(WindowID p_window
 	return 0.0f;
 }
 
+void DisplayServer::window_set_hdr_working_color_space(RenderingDeviceCommons::ColorSpace p_working_color_space, WindowID p_window) {
+	WARN_PRINT("Changing the HDR source color space is not supported by this display server.");
+}
+
+RenderingDeviceCommons::ColorSpace DisplayServer::window_get_hdr_working_color_space(WindowID p_window) const {
+	WARN_PRINT("Changing the HDR source color spac is not supported by this display server.");
+	return RenderingDeviceCommons::ColorSpace::COLOR_SPACE_BT709_LINEAR;
+}
+
 DisplayServer::WindowID DisplayServer::get_focused_window() const {
 	return MAIN_WINDOW_ID; // Proper value for single windows.
 }

@@ -73,6 +73,7 @@
 #include "servers/navigation_server_3d.h"
 #include "servers/navigation_server_3d_dummy.h"
 #include "servers/register_server_types.h"
+#include "servers/rendering/rendering_device_commons.h"
 #include "servers/rendering/rendering_server_default.h"
 #include "servers/text/text_server_dummy.h"
 #include "servers/text_server.h"
@@ -3204,6 +3205,7 @@ Error Main::setup2(bool p_show_boot_logo) {
 		if (DisplayServer::get_singleton()->has_feature(DisplayServer::FEATURE_HDR)) {
 			DisplayServer::get_singleton()->window_set_hdr_output_enabled(GLOBAL_GET("display/window/hdr/enabled"));
 			DisplayServer::get_singleton()->window_set_hdr_output_reference_luminance(GLOBAL_GET("display/window/hdr/reference_luminance"));
+			DisplayServer::get_singleton()->window_set_hdr_working_color_space((RenderingDeviceCommons::ColorSpace)((int)GLOBAL_DEF(PropertyInfo(Variant::INT, "rendering/viewport/working_color_space", PROPERTY_HINT_ENUM, "Rec.709,Display-P3,Rec.2020"), 0) + 3));
 		}
 
 		Color clear = GLOBAL_DEF_BASIC("rendering/environment/defaults/default_clear_color", Color(0.3, 0.3, 0.3));

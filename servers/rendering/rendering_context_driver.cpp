@@ -107,6 +107,22 @@ float RenderingContextDriver::window_get_hdr_output_reference_luminance(DisplayS
 	}
 }
 
+void RenderingContextDriver::window_set_hdr_working_color_space(DisplayServer::WindowID p_window, RenderingDeviceCommons::ColorSpace p_working_color_space) {
+	SurfaceID surface = surface_get_from_window(p_window);
+	if (surface) {
+		surface_set_hdr_working_color_space(surface, p_working_color_space);
+	}
+}
+
+RenderingDeviceCommons::ColorSpace RenderingContextDriver::window_get_hdr_working_color_space(DisplayServer::WindowID p_window) const {
+	SurfaceID surface = surface_get_from_window(p_window);
+	if (surface) {
+		return surface_get_hdr_working_color_space(surface);
+	} else {
+		return RenderingDeviceCommons::ColorSpace::COLOR_SPACE_BT709_LINEAR;
+	}
+}
+
 void RenderingContextDriver::window_destroy(DisplayServer::WindowID p_window) {
 	SurfaceID surface = surface_get_from_window(p_window);
 	if (surface) {

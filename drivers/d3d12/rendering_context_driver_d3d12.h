@@ -113,6 +113,8 @@ public:
 	virtual bool surface_get_hdr_output_enabled(SurfaceID p_surface) const override;
 	virtual void surface_set_hdr_output_reference_luminance(SurfaceID p_surface, float p_reference_luminance) override;
 	virtual float surface_get_hdr_output_reference_luminance(SurfaceID p_surface) const override;
+	virtual void surface_set_hdr_working_color_space(SurfaceID p_surface, RenderingDeviceCommons::ColorSpace p_working_color_space) override;
+	virtual RenderingDeviceCommons::ColorSpace surface_get_hdr_working_color_space(SurfaceID p_surface) const override;
 	virtual uint32_t surface_get_width(SurfaceID p_surface) const override;
 	virtual uint32_t surface_get_height(SurfaceID p_surface) const override;
 	virtual void surface_set_needs_resize(SurfaceID p_surface, bool p_needs_resize) override;
@@ -137,6 +139,7 @@ public:
 		ComPtr<IDCompositionDevice> composition_device;
 		ComPtr<IDCompositionTarget> composition_target;
 		ComPtr<IDCompositionVisual> composition_visual;
+		RenderingDeviceCommons::ColorSpace working_color_space;
 	};
 
 	HMODULE lib_d3d12 = nullptr;

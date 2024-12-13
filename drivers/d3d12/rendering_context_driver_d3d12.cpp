@@ -303,6 +303,18 @@ float RenderingContextDriverD3D12::surface_get_hdr_output_reference_luminance(Su
 	return surface->hdr_reference_luminance;
 }
 
+void RenderingContextDriverD3D12::surface_set_hdr_working_color_space(SurfaceID p_surface, RenderingDeviceCommons::ColorSpace p_working_color_space) {
+	// @TODO: Make this actually work?
+	Surface *surface = (Surface *)(p_surface);
+	surface->working_color_space = p_working_color_space;
+}
+
+RenderingDeviceCommons::ColorSpace RenderingContextDriverD3D12::surface_get_hdr_working_color_space(SurfaceID p_surface) const {
+	// @TODO: Make this actually work?
+	Surface *surface = (Surface *)(p_surface);
+	return surface->working_color_space;
+}
+
 uint32_t RenderingContextDriverD3D12::surface_get_width(SurfaceID p_surface) const {
 	Surface *surface = (Surface *)(p_surface);
 	return surface->width;

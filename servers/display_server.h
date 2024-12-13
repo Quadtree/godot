@@ -39,6 +39,8 @@
 
 #include "display/native_menu.h"
 
+#include "servers/rendering/rendering_device_commons.h"
+
 class Texture2D;
 
 class DisplayServer : public Object {
@@ -472,6 +474,8 @@ public:
 	virtual bool window_get_hdr_output_enabled(WindowID p_window = MAIN_WINDOW_ID) const;
 	virtual void window_set_hdr_output_reference_luminance(const float p_reference_luminance, WindowID p_window = MAIN_WINDOW_ID);
 	virtual float window_get_hdr_output_reference_luminance(WindowID p_window = MAIN_WINDOW_ID) const;
+	virtual void window_set_hdr_working_color_space(const RenderingDeviceCommons::ColorSpace p_working_color_space, WindowID p_window = MAIN_WINDOW_ID);
+	virtual RenderingDeviceCommons::ColorSpace window_get_hdr_working_color_space(WindowID p_window = MAIN_WINDOW_ID) const;
 
 	virtual bool window_is_maximize_allowed(WindowID p_window = MAIN_WINDOW_ID) const = 0;
 

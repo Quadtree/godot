@@ -33,6 +33,7 @@
 
 #include "core/object/object.h"
 #include "servers/display_server.h"
+#include "servers/rendering/rendering_device_commons.h"
 
 class RenderingDeviceDriver;
 
@@ -53,6 +54,8 @@ public:
 	bool window_get_hdr_output_enabled(DisplayServer::WindowID p_window) const;
 	void window_set_hdr_output_reference_luminance(DisplayServer::WindowID p_window, float p_reference_luminance);
 	float window_get_hdr_output_reference_luminance(DisplayServer::WindowID p_window) const;
+	void window_set_hdr_working_color_space(DisplayServer::WindowID p_window, RenderingDeviceCommons::ColorSpace p_working_color_space);
+	RenderingDeviceCommons::ColorSpace window_get_hdr_working_color_space(DisplayServer::WindowID p_window) const;
 	void window_destroy(DisplayServer::WindowID p_window);
 
 public:
@@ -103,6 +106,8 @@ public:
 	virtual bool surface_get_hdr_output_enabled(SurfaceID p_surface) const = 0;
 	virtual void surface_set_hdr_output_reference_luminance(SurfaceID p_surface, float p_reference_luminance) = 0;
 	virtual float surface_get_hdr_output_reference_luminance(SurfaceID p_surface) const = 0;
+	virtual void surface_set_hdr_working_color_space(SurfaceID p_surface, RenderingDeviceCommons::ColorSpace p_working_color_space) = 0;
+	virtual RenderingDeviceCommons::ColorSpace surface_get_hdr_working_color_space(SurfaceID p_surface) const = 0;
 	virtual uint32_t surface_get_width(SurfaceID p_surface) const = 0;
 	virtual uint32_t surface_get_height(SurfaceID p_surface) const = 0;
 	virtual void surface_set_needs_resize(SurfaceID p_surface, bool p_needs_resize) = 0;

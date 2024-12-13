@@ -47,6 +47,7 @@ void RendererCompositorRD::blit_render_targets_to_screen(DisplayServer::WindowID
 
 	const RD::ColorSpace color_space = RD::get_singleton()->screen_get_color_space(p_screen);
 	const float reference_luminance = RD::get_singleton()->get_context_driver()->window_get_hdr_output_reference_luminance(p_screen);
+	const RD::ColorSpace working_color_space = RD::get_singleton()->get_context_driver()->window_get_hdr_working_color_space(p_screen);
 
 	for (int i = 0; i < p_amount; i++) {
 		RID rd_texture = texture_storage->render_target_get_rd_texture(p_render_targets[i].render_target);
@@ -100,6 +101,7 @@ void RendererCompositorRD::blit_render_targets_to_screen(DisplayServer::WindowID
 		blit.push_constant.source_is_srgb = !texture_storage->render_target_is_using_hdr(p_render_targets[i].render_target);
 		blit.push_constant.target_color_space = color_space;
 		blit.push_constant.reference_display_luminance = reference_luminance;
+		blit.push_constant.working_color_space = working_color_space;
 
 		RD::get_singleton()->draw_list_set_push_constant(draw_list, &blit.push_constant, sizeof(BlitPushConstant));
 		RD::get_singleton()->draw_list_draw(draw_list, true);
@@ -283,6 +285,7 @@ void RendererCompositorRD::set_boot_image(const Ref<Image> &p_image, const Color
 	blit.push_constant.source_is_srgb = true;
 	blit.push_constant.target_color_space = color_space;
 	blit.push_constant.reference_display_luminance = reference_luminance;
+	blit.push_constant.working_color_space = RenderingDeviceCommons::COLOR_SPACE_BT709_LINEAR;
 
 	RD::get_singleton()->draw_list_set_push_constant(draw_list, &blit.push_constant, sizeof(BlitPushConstant));
 	RD::get_singleton()->draw_list_draw(draw_list, true);

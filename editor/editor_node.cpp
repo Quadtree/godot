@@ -405,6 +405,7 @@ void EditorNode::_update_from_settings() {
 	if (DisplayServer::get_singleton()->has_feature(DisplayServer::FEATURE_HDR)) {
 		DisplayServer::get_singleton()->window_set_hdr_output_enabled(GLOBAL_GET("display/window/hdr/enabled"));
 		DisplayServer::get_singleton()->window_set_hdr_output_reference_luminance(GLOBAL_GET("display/window/hdr/reference_luminance"));
+		DisplayServer::get_singleton()->window_set_hdr_working_color_space((RenderingDeviceCommons::ColorSpace)((int)GLOBAL_DEF(PropertyInfo(Variant::INT, "rendering/viewport/working_color_space", PROPERTY_HINT_ENUM, "Rec.709,Display-P3,Rec.2020"), 0) + 3));
 	}
 
 	RS::DOFBokehShape dof_shape = RS::DOFBokehShape(int(GLOBAL_GET("rendering/camera/depth_of_field/depth_of_field_bokeh_shape")));

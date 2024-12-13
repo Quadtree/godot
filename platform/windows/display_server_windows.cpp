@@ -3751,6 +3751,26 @@ float DisplayServerWindows::window_get_hdr_output_reference_luminance(WindowID p
 	return 0.0f;
 }
 
+void DisplayServerWindows::window_set_hdr_working_color_space(RenderingDeviceCommons::ColorSpace p_working_color_space, WindowID p_window) {
+	_THREAD_SAFE_METHOD_
+#if defined(RD_ENABLED)
+	if (rendering_context) {
+		rendering_context->window_set_hdr_working_color_space(p_window, p_working_color_space);
+	}
+#endif
+}
+
+RenderingDeviceCommons::ColorSpace DisplayServerWindows::window_get_hdr_working_color_space(WindowID p_window) const {
+	_THREAD_SAFE_METHOD_
+#if defined(RD_ENABLED)
+	if (rendering_context) {
+		return rendering_context->window_get_hdr_working_color_space(p_window);
+	}
+#endif
+
+	return RenderingDeviceCommons::ColorSpace::COLOR_SPACE_BT709_LINEAR;
+}
+
 void DisplayServerWindows::set_context(Context p_context) {
 }
 

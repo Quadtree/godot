@@ -799,6 +799,8 @@ public:
 	virtual bool window_get_hdr_output_enabled(WindowID p_window = MAIN_WINDOW_ID) const override;
 	virtual void window_set_hdr_output_reference_luminance(const float p_reference_luminance, WindowID p_window = MAIN_WINDOW_ID) override;
 	virtual float window_get_hdr_output_reference_luminance(WindowID p_window = MAIN_WINDOW_ID) const override;
+	virtual void window_set_hdr_working_color_space(const RenderingDeviceCommons::ColorSpace p_working_color_space, WindowID p_window = MAIN_WINDOW_ID) override;
+	virtual RenderingDeviceCommons::ColorSpace window_get_hdr_working_color_space(WindowID p_window = MAIN_WINDOW_ID) const override;
 
 	virtual void cursor_set_shape(CursorShape p_shape) override;
 	virtual CursorShape cursor_get_shape() const override;

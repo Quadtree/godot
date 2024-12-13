@@ -22,6 +22,7 @@ layout(push_constant, std140) uniform Pos {
 
 	uint target_color_space;
 	float reference_display_luminance;
+	uint working_color_space;
 }
 data;
 
@@ -64,6 +65,7 @@ layout(push_constant, std140) uniform Pos {
 
 	uint target_color_space;
 	float reference_display_luminance;
+	uint working_color_space;
 }
 data;
 
@@ -123,6 +125,6 @@ void main() {
 			color.rgb = srgb_to_linear(color.rgb); // sRGB -> linear conversion.
 		}
 
-		color.rgb = linear_to_st2084(color.rgb, data.reference_display_luminance); // linear -> ST2084 conversion.
+		color.rgb = linear_to_st2084(color.rgb, data.reference_display_luminance, data.working_color_space); // linear -> ST2084 conversion.
 	}
 }

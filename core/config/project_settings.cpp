@@ -1490,6 +1490,7 @@ ProjectSettings::ProjectSettings() {
 
 	GLOBAL_DEF("display/window/hdr/enabled", false);
 	GLOBAL_DEF(PropertyInfo(Variant::FLOAT, "display/window/hdr/reference_luminance", PROPERTY_HINT_RANGE, "0,1000,1,or_greater"), 200.0f);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "rendering/viewport/working_color_space", PROPERTY_HINT_ENUM, "Rec.709,Display-P3,Rec.2020"), 0);
 
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "display/window/size/window_width_override", PROPERTY_HINT_RANGE, "0,7680,1,or_greater"), 0); // 8K resolution
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "display/window/size/window_height_override", PROPERTY_HINT_RANGE, "0,4320,1,or_greater"), 0); // 8K resolution

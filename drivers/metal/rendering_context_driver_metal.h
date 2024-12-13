@@ -80,6 +80,8 @@ public:
 	virtual bool surface_get_hdr_output_enabled(SurfaceID p_surface) const final override;
 	virtual void surface_set_hdr_output_reference_luminance(SurfaceID p_surface, float p_reference_luminance) final override;
 	virtual float surface_get_hdr_output_reference_luminance(SurfaceID p_surface) const final override;
+	virtual void surface_set_hdr_working_color_space(SurfaceID p_surface, RenderingDeviceCommons::ColorSpace p_working_color_space) override;
+	virtual RenderingDeviceCommons::ColorSpace surface_get_hdr_working_color_space(SurfaceID p_surface) const override;
 	uint32_t surface_get_width(SurfaceID p_surface) const final override;
 	uint32_t surface_get_height(SurfaceID p_surface) const final override;
 	void surface_set_needs_resize(SurfaceID p_surface, bool p_needs_resize) final override;
@@ -114,6 +116,7 @@ public:
 		float hdr_reference_luminance = 0.0f;
 		bool needs_resize = false;
 		double present_minimum_duration = 0.0;
+		RenderingDeviceCommons::ColorSpace working_color_space;
 
 		Surface(
 #ifdef __OBJC__

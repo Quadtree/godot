@@ -88,6 +88,10 @@ protected:
 
 		uint32_t target_color_space;
 		float reference_display_luminance;
+		uint32_t working_color_space;
+
+		// push constants must be aligned on 16-byte boundaries
+		uint32_t pad[3];
 	};
 
 	struct Blit {

@@ -231,6 +231,18 @@ float RenderingContextDriverMetal::surface_get_hdr_output_reference_luminance(Su
 	return surface->hdr_reference_luminance;
 }
 
+void RenderingContextDriverMetal::surface_set_hdr_working_color_space(SurfaceID p_surface, RenderingDeviceCommons::ColorSpace p_working_color_space) {
+	// @TODO: Verify this actually works?
+	Surface *surface = (Surface *)(p_surface);
+	surface->working_color_space = p_working_color_space;
+}
+
+RenderingDeviceCommons::ColorSpace RenderingContextDriverMetal::surface_get_hdr_working_color_space(SurfaceID p_surface) const {
+	// @TODO: Verify this actually works?
+	Surface *surface = (Surface *)(p_surface);
+	return surface->working_color_space;
+}
+
 uint32_t RenderingContextDriverMetal::surface_get_width(SurfaceID p_surface) const {
 	Surface *surface = (Surface *)(p_surface);
 	return surface->width;
