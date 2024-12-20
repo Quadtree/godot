@@ -28,8 +28,28 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#include <stdio.h>
+#include <stdlib.h>
+
 extern int godot_web_main(int argc, char *argv[]);
 
+extern "C" {
+void wasm_mono_entrypoint(int argc, void *argv) {
+	printf("wasm_mono_entrypoint: That game engine you've been WAITING for has arrived!\n");
+
+	printf("wasm_mono_entrypoint: argc=%d\n", argc);
+
+	for (auto i = 0; i < argc; ++i) {
+		char *argVal = ((char **)argv)[i];
+		printf("wasm_mono_entrypoint: argv[%d]=%s\n", i, argVal);
+	}
+
+	auto returnCode = godot_web_main(argc, (char **)argv);
+	printf("wasm_mono_entrypoint: Main function exited with code %d", returnCode);
+}
+}
+
 int main(int argc, char *argv[]) {
+	printf("That game engine you've been WAITING for has arrived!\n");
 	return godot_web_main(argc, argv);
 }

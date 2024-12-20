@@ -1055,6 +1055,7 @@ DisplayServerWeb::DisplayServerWeb(const String &p_rendering_driver, WindowMode 
 		attributes.majorVersion = 2;
 		attributes.explicitSwapControl = true;
 
+		printf("Initializing WebGL2 context canvas_id=%s\n", canvas_id);
 		webgl_ctx = emscripten_webgl_create_context(canvas_id, &attributes);
 		webgl2_inited = webgl_ctx && emscripten_webgl_make_context_current(webgl_ctx) == EMSCRIPTEN_RESULT_SUCCESS;
 	}

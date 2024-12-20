@@ -142,6 +142,8 @@ static void _editor_init() {
 #endif // TOOLS_ENABLED
 
 void initialize_gdscript_module(ModuleInitializationLevel p_level) {
+	printf("initialize_gdscript_module(%d)\n", p_level);
+
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SERVERS) {
 		GDREGISTER_CLASS(GDScript);
 

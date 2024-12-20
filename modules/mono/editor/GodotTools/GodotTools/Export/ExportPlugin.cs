@@ -147,10 +147,10 @@ namespace GodotTools.Export
             if (!DeterminePlatformFromFeatures(features, out string? platform))
                 throw new NotSupportedException("Target platform not supported.");
 
-            if (!new[] { OS.Platforms.Windows, OS.Platforms.LinuxBSD, OS.Platforms.MacOS, OS.Platforms.Android, OS.Platforms.iOS }
+            if (!new[] { OS.Platforms.Windows, OS.Platforms.LinuxBSD, OS.Platforms.MacOS, OS.Platforms.Android, OS.Platforms.iOS, OS.Platforms.Web }
                     .Contains(platform))
             {
-                throw new NotImplementedException("Target platform not yet implemented.");
+                throw new NotImplementedException($"Target platform {platform} not yet implemented.");
             }
 
             PublishConfig publishConfig = new()

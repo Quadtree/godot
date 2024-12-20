@@ -49,6 +49,11 @@
 #include "core/os/os.h"
 #include "core/os/thread.h"
 
+#ifdef __EMSCRIPTEN__
+#include "emscripten.h"
+#include "emscripten/bind.h"
+#endif
+
 #ifdef UNIX_ENABLED
 #include <dlfcn.h>
 #endif
@@ -284,6 +289,7 @@ godot_plugins_initialize_fn initialize_hostfxr_and_godot_plugins(bool &r_runtime
 }
 #else
 godot_plugins_initialize_fn initialize_hostfxr_and_godot_plugins(bool &r_runtime_initialized) {
+#if !defined(__EMSCRIPTEN__)
 	godot_plugins_initialize_fn godot_plugins_initialize = nullptr;
 
 	String assembly_name = path::get_csharp_project_name();
@@ -308,6 +314,17 @@ godot_plugins_initialize_fn initialize_hostfxr_and_godot_plugins(bool &r_runtime
 	ERR_FAIL_COND_V_MSG(rc != 0, nullptr, ".NET: Failed to get GodotPlugins initialization function pointer");
 
 	return godot_plugins_initialize;
+#else
+	// when in enscripten mode, .NET is already initialized, so we just need to get a pointer to the initialization function
+
+	auto functionPointer = EM_ASM_INT({
+		return GetInitializeFromGameProjectPtr();
+	});
+
+	printf("initialize_hostfxr_and_godot_plugins called GetInitializeFromGameProjectPtr(), received %d\n", functionPointer);
+
+	return (godot_plugins_initialize_fn)functionPointer;
+#endif
 }
 
 godot_plugins_initialize_fn try_load_native_aot_library(void *&r_aot_dll_handle) {
@@ -374,7 +391,7 @@ void GDMono::initialize() {
 
 	godot_plugins_initialize_fn godot_plugins_initialize = nullptr;
 
-#if !defined(IOS_ENABLED)
+#if !defined(IOS_ENABLED) && !defined(__EMSCRIPTEN__)
 	// Check that the .NET assemblies directory exists before trying to use it.
 	if (!DirAccess::exists(GodotSharpDirs::get_api_assemblies_dir())) {
 		OS::get_singleton()->alert(vformat(RTR("Unable to find the .NET assemblies directory.\nMake sure the '%s' directory exists and contains the .NET assemblies."), GodotSharpDirs::get_api_assemblies_dir()), RTR(".NET assemblies not found"));
@@ -382,6 +399,7 @@ void GDMono::initialize() {
 	}
 #endif
 
+#if !defined(__EMSCRIPTEN__)
 	if (!load_hostfxr(hostfxr_dll_handle)) {
 #if !defined(TOOLS_ENABLED)
 		godot_plugins_initialize = try_load_native_aot_library(hostfxr_dll_handle);
@@ -399,11 +417,13 @@ void GDMono::initialize() {
 		ERR_FAIL_MSG(".NET: Failed to load hostfxr");
 #endif
 	}
+#endif
 
 	if (!is_native_aot) {
 		godot_plugins_initialize = initialize_hostfxr_and_godot_plugins(runtime_initialized);
 		ERR_FAIL_NULL(godot_plugins_initialize);
 	}
+
 
 	int32_t interop_funcs_size = 0;
 	const void **interop_funcs = godotsharp::get_runtime_interop_funcs(interop_funcs_size);
@@ -412,7 +432,7 @@ void GDMono::initialize() {
 
 	void *godot_dll_handle = nullptr;
 
-#if defined(UNIX_ENABLED) && !defined(MACOS_ENABLED) && !defined(IOS_ENABLED)
+#if defined(UNIX_ENABLED) && !defined(MACOS_ENABLED) && !defined(IOS_ENABLED) && !defined(__EMSCRIPTEN__)
 	// Managed code can access it on its own on other platforms
 	godot_dll_handle = dlopen(nullptr, RTLD_NOW);
 #endif

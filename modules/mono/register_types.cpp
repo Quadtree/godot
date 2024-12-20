@@ -41,6 +41,7 @@ Ref<ResourceFormatSaverCSharpScript> resource_saver_cs;
 mono_bind::GodotSharp *_godotsharp = nullptr;
 
 void initialize_mono_module(ModuleInitializationLevel p_level) {
+	printf("initialize_mono_module(%d)\n", p_level);
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}

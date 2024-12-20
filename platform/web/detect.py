@@ -80,6 +80,7 @@ def get_flags():
         # run-time performance.
         # Note that this overrides the "auto" behavior for target/dev_build.
         "optimize": "size",
+        'supported': ['mono'],
     }
 
 
@@ -272,14 +273,13 @@ def configure(env: "SConsEnvironment"):
         # BigInt support to pass object pointers between contexts
         needs_wasm_bigint = True
 
-    if needs_wasm_bigint:
-        env.Append(LINKFLAGS=["-sWASM_BIGINT"])
+    env.Append(LINKFLAGS=["-sWASM_BIGINT"])
 
     # Reduce code size by generating less support code (e.g. skip NodeJS support).
     env.Append(LINKFLAGS=["-sENVIRONMENT=web,worker"])
 
     # Wrap the JavaScript support code around a closure named Godot.
-    env.Append(LINKFLAGS=["-sMODULARIZE=1", "-sEXPORT_NAME='Godot'"])
+    #env.Append(LINKFLAGS=["-sMODULARIZE=1", "-sEXPORT_NAME='Godot'"])
 
     # Force long jump mode to 'wasm'
     env.Append(CCFLAGS=["-sSUPPORT_LONGJMP='wasm'"])
@@ -297,8 +297,26 @@ def configure(env: "SConsEnvironment"):
     env.Append(LINKFLAGS=["-sEXPORTED_RUNTIME_METHODS=['callMain','cwrap']"])
 
     # Add code that allow exiting runtime.
-    env.Append(LINKFLAGS=["-sEXIT_RUNTIME=1"])
+    #env.Append(LINKFLAGS=["-sEXIT_RUNTIME=1"])
 
     # This workaround creates a closure that prevents the garbage collector from freeing the WebGL context.
     # We also only use WebGL2, and changing context version is not widely supported anyway.
     env.Append(LINKFLAGS=["-sGL_WORKAROUND_SAFARI_GETCONTEXT_BUG=0"])
+
+    env.Append(LINKFLAGS=["-sEXPORTED_FUNCTIONS=['_main']"])
+
+    env.Append(CCFLAGS=["-sRELOCATABLE=1"])
+    env.Append(LINKFLAGS=["-sRELOCATABLE=1"])
+    env.Append(LINKFLAGS=["-sLINKABLE=1"])
+
+    env.Append(LINKFLAGS=["-sWASM_BIGINT=1"])
+
+    env.Append(CCFLAGS=["-fwasm-exceptions"])
+    env.Append(LINKFLAGS=["-fwasm-exceptions"])
+
+    #env.Append(LINKFLAGS=["-c"])
+    env.Append(LINKFLAGS=["-r"])
+
+    env.Append(LINKFLAGS=["-sERROR_ON_UNDEFINED_SYMBOLS=0"])
+
+    env.Append(LINKFLAGS=["-emit-llvm"])
