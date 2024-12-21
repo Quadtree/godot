@@ -1,0 +1,1 @@
+"%USERPROFILE%/AppData/Local/Programs/Python/Python313/python.exe" tmp_wasm_mono_exporter/tmp_exporter.py %*

@@ -64,9 +64,16 @@ for js in sys_env["JS_PRE"]:
 for ext in sys_env["JS_EXTERNS"]:
     sys_env["ENV"]["EMCC_CLOSURE_ARGS"] += " --externs " + ext.abspath
 
+print(f'{" ".join(("--js-library " + it.abspath for it in sys_env["JS_LIBS"]))}')
+print(f'{" ".join(("--pre-js " + it.abspath for it in sys_env["JS_PRE"]))}')
+#print(f'{" ".join(("--js-library " + it.abspath for it in sys_env["JS_EXTERNS"]))}')
+
 build = []
-build_targets = ["#bin/godot${PROGSUFFIX}.js", "#bin/godot${PROGSUFFIX}.wasm"]
+#build_targets = ["#bin/godot${PROGSUFFIX}.js", "#bin/godot${PROGSUFFIX}.wasm"]
+build_targets = ["#bin/godot${PROGSUFFIX}.a"]
+
 if env["dlink_enabled"]:
+    raise Exception("Does not work with WASM/C#")
     # Reset libraries. The main runtime will only link emscripten libraries, not godot ones.
     sys_env["LIBS"] = []
     # We use IDBFS. Since Emscripten 1.39.1 it needs to be linked explicitly.
@@ -115,4 +122,4 @@ js_wrapped = env.Textfile("#bin/godot", [env.File(f) for f in wrap_list], TEXTFI
 # 0 - unwrapped js file (use wrapped one instead)
 # 1 - wasm file
 # 2 - wasm side (when dlink is enabled).
-env.CreateTemplateZip(js_wrapped, build[1], build[2] if len(build) > 2 else None)
+#env.CreateTemplateZip(js_wrapped, build[1], build[2] if len(build) >= 2 else None)
