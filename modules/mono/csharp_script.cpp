@@ -1145,7 +1145,7 @@ bool CSharpLanguage::setup_csharp_script_binding(CSharpScriptBinding &r_script_b
 			"Type inherits from native type '" + type_name + "', so it can't be instantiated in object of type: '" + p_object->get_class() + "'.");
 
 #ifdef DEBUG_ENABLED
-	CRASH_COND(!r_script_binding.gchandle.is_released());
+	if (!r_script_binding.gchandle.is_released()) print_error("CSharpLanguage::setup_csharp_script_binding: !r_script_binding.gchandle.is_released()");
 #endif
 
 	GCHandleIntPtr strong_gchandle =
