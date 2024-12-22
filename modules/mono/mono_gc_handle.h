@@ -70,7 +70,7 @@ struct MonoGCHandleData {
 
 	void operator=(const MonoGCHandleData &p_other) {
 #ifdef DEBUG_ENABLED
-		CRASH_COND(!is_released());
+		if (!is_released()) print_error("MonoGCHandleData: operator=: !is_released()");
 #endif
 		handle = p_other.handle;
 		type = p_other.type;

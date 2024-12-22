@@ -195,6 +195,14 @@ code that a non-static object is being referenced. */
 #define PRIV(name) _pcre2_##name
 #endif
 
+#ifndef PRIV2
+#if PCRE2_CODE_UNIT_WIDTH == 32
+#define PRIV2(name) _pcre2_##name
+#else
+#define PRIV2(name) _pcre2_16_##name
+#endif
+#endif
+
 /* When compiling for use with the Virtual Pascal compiler, these functions
 need to have their names changed. PCRE2 must be compiled with the -DVPCOMPAT
 option on the command line. */
@@ -2077,7 +2085,7 @@ extern void *       _pcre2_memmove(void *, const void *, size_t);
 
 #endif  /* PCRE2_CODE_UNIT_WIDTH */
 
-extern BOOL         PRIV(ckd_smul)(PCRE2_SIZE *, int, int);
+extern BOOL         PRIV2(ckd_smul)(PCRE2_SIZE *, int, int);
 
 #endif  /* PCRE2_INTERNAL_H_IDEMPOTENT_GUARD */
 
