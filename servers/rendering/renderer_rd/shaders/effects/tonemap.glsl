@@ -608,7 +608,7 @@ void main() {
 #endif
 
 	if (params.hdr_enabled == 1) {
-		color.rgb = apply_tonemapping(color.rgb, white);
+		color.rgb = max(apply_tonemapping(color.rgb, white), vec3(0.0));
 		color.rgb = linear_to_srgb(color.rgb); // regular linear -> SRGB conversion
 	}
 
