@@ -491,7 +491,10 @@ namespace Godot.NativeInterop
                 return IntPtr.Zero;
             }
 
-            return NativeFuncs.godotsharp_instance_from_id(p_var.ObjectId);
+            uint highBits = (uint)(p_var.ObjectId >> 32);
+            uint lowBits = (uint)p_var.ObjectId;
+
+            return NativeFuncs.godotsharp_instance_from_id(highBits, lowBits);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

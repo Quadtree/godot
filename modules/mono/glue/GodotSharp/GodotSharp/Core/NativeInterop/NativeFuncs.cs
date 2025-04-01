@@ -550,7 +550,7 @@ namespace Godot.NativeInterop
 
         internal static partial int godotsharp_hash(in godot_variant p_var);
 
-        internal static partial IntPtr godotsharp_instance_from_id(ulong p_instance_id);
+        internal static partial IntPtr godotsharp_instance_from_id(uint p_instance_id_high, uint p_instance_id_low);
 
         internal static partial void godotsharp_print(in godot_string p_what);
 

@@ -4,10 +4,12 @@ This branch provides highly experimental support for running C# on Godot 4 web e
 This version is very hacky. A final version would have to be cleaned up and made to work with Godot's usual export system. This version also breaks non-Mono WASM builds, and that would have to be fixed before it could be merged.
 
 While it does work, there are a few caveats:
-- Exporting is currently done via the `tmp_wasm_mono_exporter/tmp_exporter.py` script rather than through the proper in-editor export mechanism
+- Exporting is currently done via the `tmp_wasm_mono_exporter/tmp_exporter.py` script rather than through the proper in-editor export mechanism.
 - For the linking to work, the version of Emscripten that is used to compile Godot and the version of Emscripten that .NET Core uses have to be the same. .NET Core 9 uses Emscripten `3.1.56`. This means that to get this to work, we have to relax the rule where `4.4` requires Emscripten `3.1.62`. I _think_ that this rule is only needed for GDExtensions, and at the moment GDExtensions do not work with Mono WASM anyway, so we can probably safely relax this rule specifically for the Mono WASM builds. The other problem this raises is that if Godot is going to support multiple versions of .NET Core, we will have to ship multiple versions of the compiled Godot bitcode, since again Emscripten does not guarantee any cross-version ABI stability.
-- AOT compilation doesn't work, because AOT is dependent on code trimming, which causes issues
+- AOT compilation doesn't work, because AOT is dependent on code trimming, which causes issues.
+- Jiterpreter only works for release builds. This means that debug performance is much, much worse than release builds.
 - This is not a threaded build, but it seems to be possible to create threads in .NET anyway. This seems to have unpredictable results.
+- In some cases, certain function signatures don't work when making calls from .NET to native. For example, the `NativeFuncs.godotsharp_instance_from_id` function's original signature takes a single `uint64_t` parameter, and returns a pointer, which is usually also effectively a `uint64_t` on 64-bit platforms. This works fine on desktop, but when called on web it crashes in the .NET runtime when it tries to marshal the parameters. Oddly, changing the signature to take two `uint32_t` parameters and return a pointer _does_ work. I've applied this workaround to my branch, but it would really be better if we could determine if this is a bug in the .NET runtime, and if it is get it fixed upstream.
 
 ### Code Issues
 There are some very odd code issues. For example, assume that `thing` is of type `Thing` that is a Godot Node:
@@ -33,6 +35,9 @@ Even though the "tmp2" line is in theory a no-op, it casues this to work. This i
 - Open your Godot project in the editor. Ensure that it has a Web export configuration, named "Web"
 - Run the `tmp_wasm_mono_exporter/tmp_exporter.py` script with a single argument pointing at your Godot project
 - If there are no errors, visit the app by going to http://localhost:8080/
+
+## run-wasm-build.bat Note
+This script works with an external build tool I've been using. If this tool is it should be run in `cmd.exe` on Windows. Generally, this should not be used.
 
 ## Further Development
 With more work, some of the problems with this approach could be fixed, but some are pretty hard limits:

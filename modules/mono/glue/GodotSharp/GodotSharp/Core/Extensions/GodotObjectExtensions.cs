@@ -31,7 +31,10 @@ namespace Godot
         /// <returns>The <see cref="GodotObject"/> instance.</returns>
         public static GodotObject? InstanceFromId(ulong instanceId)
         {
-            return InteropUtils.UnmanagedGetManaged(NativeFuncs.godotsharp_instance_from_id(instanceId));
+            uint highBits = (uint)(instanceId >> 32);
+            uint lowBits = (uint)instanceId;
+
+            return InteropUtils.UnmanagedGetManaged(NativeFuncs.godotsharp_instance_from_id(highBits, lowBits));
         }
 
         /// <summary>

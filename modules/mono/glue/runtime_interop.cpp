@@ -1496,7 +1496,9 @@ void godotsharp_convert(const godot_variant *p_what, int32_t p_type, godot_varia
 	memnew_placement(r_ret, Variant(ret));
 }
 
-Object *godotsharp_instance_from_id(uint64_t p_instance_id) {
+Object *godotsharp_instance_from_id(uint32_t p_instance_id_high, uint32_t p_instance_id_low) {
+	uint64_t p_instance_id = (((uint64_t)p_instance_id_high) << 32) | ((uint64_t)p_instance_id_low);
+
 	return ObjectDB::get_instance(ObjectID(p_instance_id));
 }
 
