@@ -4,4 +4,4 @@ cd emsdk
 call emsdk_env.bat
 cd ..
 cd godot
-"%USERPROFILE%/AppData/Local/Programs/Python/Python313/python.exe" ../godot_build_scripts/run_build.py --rebuild-mono-glue --wasm
+"%USERPROFILE%/AppData/Local/Programs/Python/Python313/python.exe" ../godot_build_scripts/run_build.py --rebuild-mono-glue --wasm --templates

@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("project_root")
 parser.add_argument('--build', type=int, default=1)
 parser.add_argument('--deploy')
-parser.add_argument('--debug-template', type=int, default=1, help="If 0, use the release template. If 1, use the debug template. Currently because we always use the debug C#, the release template will not work.")
+parser.add_argument('--debug-template', type=int, default=-1, help="If 0, use the release template. If 1, use the debug template. Currently because we always use the debug C#, the release template will not work.")
 args = parser.parse_args()
 
 TMP_ROOT_DIR = '/tmp'
@@ -16,10 +16,18 @@ tmp_env_var = os.getenv('TEMP')
 if tmp_env_var is not None: TMP_ROOT_DIR = tmp_env_var
 
 TMP_DIR = TMP_ROOT_DIR + '/tmp_exporter_dir'
+TMP_DIR_2 = TMP_ROOT_DIR + '/tmp_exporter_dir_2'
 FAKE_TEMPLATE_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'fake_template').replace('\\', '/')
 GODOT_ROOT = os.path.join(os.path.realpath(os.path.dirname(__file__)), '..').replace('\\', '/')
 PROJECT_ROOT = os.path.realpath(args.project_root).replace('\\', '/')
-BUILD_NAME = 'template_debug' if args.debug_template else 'template_release'
+
+if args.debug_template == -1:
+    if not args.deploy:
+        debug_template = 1
+    else:
+        debug_template = 0
+
+BUILD_NAME = 'template_debug' if debug_template else 'template_release'
 
 for fn in os.scandir(PROJECT_ROOT):
     if os.path.isfile(fn) and fn.name.endswith(".godot"):
@@ -31,11 +39,10 @@ for fn in os.scandir(PROJECT_ROOT):
 
 if not PROJECT_NAME: raise Exception()
 
-print(f'{TMP_DIR=} {FAKE_TEMPLATE_DIR=} {GODOT_ROOT=} {PROJECT_ROOT=} {PROJECT_NAME=}')
+print(f'{TMP_DIR=} {TMP_DIR_2=} {FAKE_TEMPLATE_DIR=} {GODOT_ROOT=} {PROJECT_ROOT=} {PROJECT_NAME=} {debug_template=}')
 
 if args.build == 1:
-    if os.path.exists(TMP_DIR):
-        shutil.rmtree(TMP_DIR)
+    shutil.rmtree(TMP_DIR, ignore_errors=True)
 
 def copy_file_with_substitutions(ffn:str):
     ffn = ffn.replace('\\', '/')
@@ -84,4 +91,12 @@ if args.build == 1:
 if not args.deploy:
     subprocess.run(['dotnet', 'run', '--project', f'{TMP_DIR}/web.csproj'], check=True)
 else:
-    subprocess.run(['dotnet', 'publish', '-o', args.deploy, f'{TMP_DIR}/web.csproj'], check=True)
+    print(f'DELETE {TMP_DIR_2}')
+    shutil.rmtree(TMP_DIR_2, ignore_errors=True)
+
+    os.makedirs(TMP_DIR_2)
+
+    subprocess.run(['dotnet', 'publish', '-o', TMP_DIR_2, f'{TMP_DIR}/web.csproj'], check=True)
+
+    print(f'COPY {TMP_DIR_2}/wwwroot TO {args.deploy}')
+    shutil.copytree(f'{TMP_DIR_2}/wwwroot', args.deploy, dirs_exist_ok=True)
