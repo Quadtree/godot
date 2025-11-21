@@ -53,11 +53,12 @@ def copy_file_with_substitutions(ffn:str):
 
     print(f'{ffn=} {ffn_stub=} {ffn_out=}')
 
+    os.makedirs(os.path.dirname(ffn_out), exist_ok=True)
+
     if ffn.endswith('.png'):
         shutil.copy(ffn, ffn_out)
     else:
         with open(ffn, 'r') as f_in:
-            os.makedirs(os.path.dirname(ffn_out), exist_ok=True)
             with open(ffn_out, 'w') as f_out:
                 for line in f_in:
                     line = line.replace('$GODOT_ROOT', GODOT_ROOT)
@@ -85,8 +86,13 @@ shutil.copy('platform/web/js/libs/audio.worklet.js', f'{TMP_DIR}/wwwroot/_framew
 shutil.copy('platform/web/js/libs/audio.position.worklet.js', f'{TMP_DIR}/wwwroot/_framework/godot.audio.position.worklet.js')
 
 if args.build == 1:
-    subprocess.run([f'{GODOT_ROOT}/bin/godot.windows.editor.x86_64.mono.exe', '--export-pack', f'Web', f'{TMP_DIR}/wwwroot/index.pck'], cwd=PROJECT_ROOT, check=True)
-    subprocess.run([f'{GODOT_ROOT}/bin/godot.windows.editor.x86_64.mono.exe', '--build-solutions', '--quit'], cwd=PROJECT_ROOT, check=True)
+    with open(f'{PROJECT_ROOT}/_DummyClassToPreventUnexpectedTrimming.cs', 'w') as f: f.write('public class _DummyClassToPreventUnexpectedTrimming {}\n')
+
+    subprocess.run([f'{GODOT_ROOT}/bin/godot.linuxbsd.editor.x86_64.mono', '--headless', '--export-pack', f'Web', f'{TMP_DIR}/wwwroot/index.pck'], cwd=PROJECT_ROOT, check=True)
+    subprocess.run([f'{GODOT_ROOT}/bin/godot.linuxbsd.editor.x86_64.mono', '--headless', '--build-solutions', '--quit'], cwd=PROJECT_ROOT, check=True)
+
+subprocess.run(['ls', '-la', f'{PROJECT_ROOT}/.godot/mono/temp/bin/Debug'])
+subprocess.run(['cat', f'{TMP_DIR}/web.csproj'])
 
 if not args.deploy:
     subprocess.run(['dotnet', 'run', '--project', f'{TMP_DIR}/web.csproj'], check=True)

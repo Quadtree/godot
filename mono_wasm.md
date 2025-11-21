@@ -10,6 +10,9 @@ While it does work, there are a few caveats:
 - Jiterpreter only works for release builds. This means that debug performance is much, much worse than release builds.
 - This is not a threaded build, but it seems to be possible to create threads in .NET anyway. This seems to have unpredictable results.
 - In some cases, certain function signatures don't work when making calls from .NET to native. For example, the `NativeFuncs.godotsharp_instance_from_id` function's original signature takes a single `uint64_t` parameter, and returns a pointer, which is usually also effectively a `uint64_t` on 64-bit platforms. This works fine on desktop, but when called on web it crashes in the .NET runtime when it tries to marshal the parameters. Oddly, changing the signature to take two `uint32_t` parameters and return a pointer _does_ work. I've applied this workaround to my branch, but it would really be better if we could determine if this is a bug in the .NET runtime, and if it is get it fixed upstream.
+- .NET 9 on Linux seems to be buggy, although it's possible I'm just not understanding how it works. These issues don't seem to be there on Windows.
+  - `GodotPlugin.Game.Main` was marked as private, even though the code generator defines it as public. This required me to reference it through very hacky reflection.
+  - Related to this, since we can't reference `GodotPlugin.Game.Main` we have to reference a fake class from the game's assembly, or the entire thing will be trimmed because nothing references it.
 
 ### Code Issues
 There are some very odd code issues. For example, assume that `thing` is of type `Thing` that is a Godot Node:

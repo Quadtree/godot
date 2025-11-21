@@ -19,10 +19,10 @@
 
   <ItemGroup>
     <Reference Include="$PROJECT_NAME">
-      <HintPath>$PROJECT_ROOT/.godot\mono\temp\bin\Debug\$PROJECT_NAME.dll</HintPath>
+      <HintPath>$PROJECT_ROOT/.godot/mono/temp/bin/Debug/$PROJECT_NAME.dll</HintPath>
     </Reference>
     <Reference Include="GodotSharp">
-      <HintPath>$PROJECT_ROOT/.godot\mono\temp\bin\Debug\GodotSharp.dll</HintPath>
+      <HintPath>$PROJECT_ROOT/.godot/mono/temp/bin/Debug/GodotSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
 
