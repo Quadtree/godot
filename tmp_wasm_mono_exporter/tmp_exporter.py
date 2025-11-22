@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("project_root")
 parser.add_argument('--build', type=int, default=1)
 parser.add_argument('--deploy')
+parser.add_argument('--stage-first', action="store_true")
 parser.add_argument('--debug-template', type=int, default=-1, help="If 0, use the release template. If 1, use the debug template. Currently because we always use the debug C#, the release template will not work.")
 args = parser.parse_args()
 
@@ -20,6 +21,34 @@ TMP_DIR_2 = TMP_ROOT_DIR + '/tmp_exporter_dir_2'
 FAKE_TEMPLATE_DIR = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'fake_template').replace('\\', '/')
 GODOT_ROOT = os.path.join(os.path.realpath(os.path.dirname(__file__)), '..').replace('\\', '/')
 PROJECT_ROOT = os.path.realpath(args.project_root).replace('\\', '/')
+
+if args.stage_first:
+    has_csproj = False
+    has_sln = False
+
+    STAGE_DIR = TMP_ROOT_DIR + '/tmp_stage_dir'
+    os.makedirs(STAGE_DIR, exist_ok=True)
+    for ff in os.scandir(PROJECT_ROOT):
+        if ff.name == '.godot' or ff.name == 'export_presets.cfg': continue
+
+        if ff.name.lower().endswith('.csproj'): has_csproj = True
+        if ff.name.lower().endswith('.sln'): has_sln = True
+
+        stage_loc = os.path.join(STAGE_DIR, ff.name)
+
+        if '.csproj' in ff.name or '.sln' in ff.name:
+            print(f'Staging {ff} to {stage_loc} via copy', flush=True)
+            shutil.copy(ff, stage_loc)
+        else:
+            print(f'Staging {ff} to {stage_loc} via symlink', flush=True)
+            os.symlink(ff, stage_loc)
+
+    if not has_csproj or not has_sln: raise Exception("One or more project files (.sln and .csproj) are missing. Open the project in the Godot editor, go to Project -> Tools -> C# -> Create C# solution")
+
+    shutil.copy('/usr/local/etc/export_presets.cfg', os.path.join(STAGE_DIR, 'export_presets.cfg'))
+
+    PROJECT_ROOT = STAGE_DIR
+
 
 if args.debug_template == -1:
     if not args.deploy:
@@ -89,9 +118,10 @@ if args.build == 1:
     with open(f'{PROJECT_ROOT}/_DummyClassToPreventUnexpectedTrimming.cs', 'w') as f: f.write('public class _DummyClassToPreventUnexpectedTrimming {}\n')
 
     subprocess.run([f'{GODOT_ROOT}/bin/godot.linuxbsd.editor.x86_64.mono', '--headless', '--export-pack', f'Web', f'{TMP_DIR}/wwwroot/index.pck'], cwd=PROJECT_ROOT, check=True)
+    print('BUILD SOLUTIONS', flush=True)
     subprocess.run([f'{GODOT_ROOT}/bin/godot.linuxbsd.editor.x86_64.mono', '--headless', '--build-solutions', '--quit'], cwd=PROJECT_ROOT, check=True)
 
-subprocess.run(['ls', '-la', f'{PROJECT_ROOT}/.godot/mono/temp/bin/Debug'])
+subprocess.run(['ls', '-la', f'{PROJECT_ROOT}/.godot/mono/temp/bin/Debug'], check=True)
 subprocess.run(['cat', f'{TMP_DIR}/web.csproj'])
 
 if not args.deploy:
